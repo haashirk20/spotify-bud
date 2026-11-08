@@ -1,14 +1,27 @@
-# Spotifybud
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/readme/hero-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/readme/hero-light.svg">
+    <img src="assets/readme/hero-dark.svg" width="880" alt="Spotifybud: a Telegram bot with 4 commands that converts SoundCloud playlists to Spotify, recommends songs and builds 10-track Spotify playlists. Example chat with a /playlist request.">
+  </picture>
+</p>
 
-A Telegram bot that converts SoundCloud playlists to Spotify, recommends songs, and builds Spotify playlists from a song, artist or genre.
+<p align="center">
+  <strong>A Telegram bot that converts SoundCloud playlists to Spotify, recommends songs, and builds playlists from one search.</strong><br>
+  <sub>Python, python-telegram-bot, Spotipy and soundcloud-lib. Bot: <a href="https://t.me/spotifybuddy_bot">@spotifybuddy_bot</a> (it only responds while <code>app.py</code> is running) <!-- verify: bot is still registered --></sub>
+</p>
 
-![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white)
-![Telegram Bot](https://img.shields.io/badge/python--telegram--bot-26A5E4?logo=telegram&logoColor=white)
-![Spotify Web API](https://img.shields.io/badge/Spotify%20Web%20API-1DB954?logo=spotify&logoColor=white)
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-121212?style=flat-square&logo=python&logoColor=white" alt="Python">
+  <img src="https://img.shields.io/badge/python--telegram--bot-121212?style=flat-square&logo=telegram&logoColor=26A5E4" alt="python-telegram-bot">
+  <img src="https://img.shields.io/badge/Spotify%20Web%20API-121212?style=flat-square&logo=spotify&logoColor=1DB954" alt="Spotify Web API">
+</p>
+
+---
+
+Spotifybud does common Spotify tasks from a Telegram chat. Send it a SoundCloud playlist link and it rebuilds the playlist on Spotify. Send it a song and it suggests a similar one. Send it any search term and it makes a 10-track playlist and replies with the link.
 
 ## Demo
-
-Bot: [@spotifybuddy_bot](https://t.me/spotifybuddy_bot) (it only responds while `app.py` is running) <!-- verify: bot is still registered -->
 
 Convert a SoundCloud playlist:
 
@@ -22,22 +35,41 @@ Generate a playlist:
 
 ![Generated playlist](https://github.com/haashirk20/spotify-bud/assets/114118228/163d21cb-33b9-46f4-905b-4244fcaa9136)
 
-## Overview
+## Commands
 
-Spotifybud does common Spotify tasks from a Telegram chat. Send it a SoundCloud playlist link and it rebuilds the playlist on Spotify. Send it a song and it suggests a similar one. Send it any search term and it makes a 10-track playlist and replies with the link.
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/readme/commands-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/readme/commands-light.svg">
+    <img src="assets/readme/commands-dark.svg" width="880" alt="Commands: /convert, /recommend, /playlist and /help, with the bot's reply to each.">
+  </picture>
+</p>
 
-## Key features
+`/recommend` and `/playlist` share one helper. It searches Spotify for your text, takes the top track's ID, and calls the recommendations endpoint with that track as the seed. `/recommend` replies with the first result; `/playlist` puts all 10 into a new public playlist on the bot owner's account.
 
-| Command | What it does |
-|---|---|
-| `/convert <soundcloud playlist link>` | Resolves the SoundCloud playlist, finds each track on Spotify by artist and title, and creates a Spotify playlist named after it |
-| `/recommend <song>` | Finds the song on Spotify and replies with one similar track and its link |
-| `/playlist <song, artist or genre>` | Creates a public Spotify playlist of 10 similar tracks and replies with the link |
-| `/help` | Lists the commands |
+## Converting a playlist
 
-Messages that aren't commands get a pointer to `/help`, and each command asks for its argument if you leave it out.
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/readme/convert-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/readme/convert-light.svg">
+    <img src="assets/readme/convert-dark.svg" width="880" alt="Converting a playlist: SoundCloud link, resolve with sclib, search Spotify for each track by artist and title, create a playlist with a 5-character suffix, reply with the link.">
+  </picture>
+</p>
 
-## Tech stack
+`sclib` resolves the SoundCloud URL into a playlist and its tracks. For each track the bot searches Spotify for the artist and title and takes the first match. New playlist names get a 5-character suffix from Python's `secrets` module, so the bot can find the playlist it just created among the account's playlists and add the tracks to it.
+
+## Architecture
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/readme/architecture-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/readme/architecture-light.svg">
+    <img src="assets/readme/architecture-dark.svg" width="880" alt="Architecture: Telegram chat, lib/app.py command router, lib/spotify_api.py, Spotify Web API and SoundCloud, with credentials in a gitignored lib/auth.py.">
+  </picture>
+</p>
+
+`lib/app.py` is the Telegram side: one handler takes every command and routes it by name to a function that returns the reply text. `lib/spotify_api.py` holds all the Spotify and SoundCloud calls. Credentials stay in a gitignored `auth.py` module, and the Spotify scope is limited to `playlist-modify-public`.
 
 | Area | Tools |
 |---|---|
@@ -46,27 +78,6 @@ Messages that aren't commands get a pointer to `/help`, and each command asks fo
 | Spotify | Spotipy with the OAuth authorization-code flow |
 | SoundCloud | `soundcloud-lib` (`sclib`) |
 | Packaging | PyInstaller (Windows `.exe` in `app/`) |
-
-## Architecture
-
-`lib/app.py` is the Telegram side: one handler takes every command and routes it by name to a function that returns the reply text. `lib/spotify_api.py` holds all the Spotify and SoundCloud calls.
-
-```mermaid
-flowchart LR
-    tg["Telegram chat"] <-- "long polling" --> bot["lib/app.py<br/>command router"]
-    bot --> api["lib/spotify_api.py"]
-    api -- "search, recommendations,<br/>create playlist" --> sp["Spotify Web API"]
-    api -- "resolve playlist" --> sc["SoundCloud"]
-    auth["lib/auth.py<br/>(gitignored)"] --> bot
-    auth --> api
-```
-
-## Technical highlights
-
-- Recommendations and generated playlists use one helper: search Spotify for the query, take the top track's ID, and call the recommendations endpoint with it as the seed.
-- Conversion maps tracks across services by searching Spotify for each SoundCloud track's artist and title and taking the first match.
-- New playlist names get a 5-character suffix from Python's `secrets` module, so the bot can find the playlist it just created among the account's playlists and add tracks to it.
-- Credentials stay in a gitignored `auth.py` module, and the Spotify scope is limited to `playlist-modify-public`.
 
 ## Getting started
 
