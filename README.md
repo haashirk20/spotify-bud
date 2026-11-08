@@ -8,8 +8,6 @@ A Telegram bot that converts SoundCloud playlists to Spotify, recommends songs, 
 
 ## Demo
 
-<!-- TODO: demo link or video -->
-
 Bot: [@spotifybuddy_bot](https://t.me/spotifybuddy_bot) (it only responds while `app.py` is running) <!-- verify: bot is still registered -->
 
 Convert a SoundCloud playlist:
